@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "public": "frontend/build",
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "pythonApi"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18",
+    "memory": "512MB"
+  }
+}
