@@ -2,6 +2,12 @@ import json
 import requests
 import csv
 
+from flask import Flask, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # This enables CORS for all routes
+
 COCKTAILS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj24vDcMr96JYTqKeaVyYmvAvEwKF_SgSEXM12rKl_TIufI_oDKaSIKmLMfZU1srdDB1oS/pub?gid=0&single=true&output=csv"
 INGREDIENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj24vDcMr96JYTqKeaVyYmvAvEwKF_SgSEXM12rKl_TIufI_oDKaSIKmLMfZU1srdDB1oS/pub?gid=1237016155&single=true&output=csv"
 
@@ -11,6 +17,7 @@ def fix_encoding(text):
         return ""  # Return an empty string if None
     return text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")  # Ensures valid UTF-8
 
+@app.route('/api/cocktails', methods=['GET'])
 def fetch_cocktails():
     try:
         # Fetch CSV data from URLs
@@ -62,5 +69,6 @@ def fetch_cocktails():
         return json.dumps({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    response = fetch_cocktails()
-    print(response)
+    # response = fetch_cocktails()
+    # print(response)
+    app.run(debug=True)

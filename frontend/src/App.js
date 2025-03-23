@@ -8,12 +8,22 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCocktail, setSelectedCocktail] = useState(null);
 
+  const API_BASE = process.env.REACT_APP_API_URL;
+
   // Fetch Cocktails From The Backend
   useEffect(() => {
-    fetch('https://cocktail-website-a4f5d.web.app/api/cocktails/')
-      .then(response => response.json())
-      .then(data => setCocktails(data))
-      .catch(error => console.error('Error fetching data:', error));
+    fetch(`${API_BASE}/api/cocktails`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      console.log(response);
+      return response; // Make sure to return the response here
+    })
+    .then(response => response.json())
+    .then(data => setCocktails(data))
+    .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   const handleSearch = (event) => {
