@@ -100,3 +100,6 @@ venv/
 
 # dataconnect generated files
 .dataconnect
+
+# Frontend
+frontend/build/
