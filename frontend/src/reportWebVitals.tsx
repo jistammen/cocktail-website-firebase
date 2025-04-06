@@ -1,4 +1,9 @@
-const reportWebVitals = onPerfEntry => {
+// 1. Import the ReportHandler type from web-vitals
+import { ReportHandler } from 'web-vitals';
+
+const reportWebVitals = (onPerfEntry?: ReportHandler) => {
+  // 2. Make the argument optional (onPerfEntry?), 
+  //    so you can call reportWebVitals() with zero arguments
   if (onPerfEntry && onPerfEntry instanceof Function) {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(onPerfEntry);

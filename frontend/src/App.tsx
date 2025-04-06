@@ -1,37 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import './App.css';
 import { FaCocktail } from 'react-icons/fa';
 
+interface Ingredient {
+  ingredient: string;
+  amount: string;
+}
+
+interface Cocktail {
+  name: string;
+  description: string;
+  category: string;
+  base_spirit: string;
+  history: string;
+  recommendations: string;
+  instructions: string;
+  ingredients: Ingredient[];
+}
+
+// Explicitly cast FaCocktail to a valid React component type
+const CocktailIcon = FaCocktail as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
+
 function App() {
   // Set Constant Or Default Values
-  const [cocktails, setCocktails] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCocktail, setSelectedCocktail] = useState(null);
+  const [cocktails, setCocktails] = useState<Cocktail[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedCocktail, setSelectedCocktail] = useState<Cocktail | null>(null);
 
   const API_BASE = process.env.REACT_APP_API_URL;
 
   // Fetch Cocktails From The Backend
   useEffect(() => {
+    if (!API_BASE) {
+      console.error('API_BASE is not defined');
+      return;
+    }
     fetch(`${API_BASE}/api/cocktails`, {
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    .then(response => {
-      console.log(response);
-      return response; // Make sure to return the response here
-    })
-    .then(response => response.json())
-    .then(data => setCocktails(data))
-    .catch(error => console.error('Error fetching data:', error));
+      .then(response => {
+        console.log(response);
+        return response; // Make sure to return the response here
+      })
+      .then(response => response.json())
+      .then((data: Cocktail[]) => setCocktails(data))
+      .catch(error => console.error('Error fetching data:', error));
   }, [API_BASE]);
 
-  const handleSearch = (event) => {
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
   // Normalize And Remove Diacritics From A String
-  function normalize(str) {
+  function normalize(str: string): string {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
 
@@ -40,7 +63,7 @@ function App() {
 
   // Filter Cocktails By Name Or Ingredients ----- Add an X option to remove/clear the search term
   const filteredCocktails = cocktails.filter(cocktail => {
-  // const filteredCocktails = sortedCocktails.filter(cocktail => {
+    // const filteredCocktails = sortedCocktails.filter(cocktail => {
     // Normalize The Search Term
     const normalizedSearchTerm = normalize(searchTerm);
     // Check If Any Cocktail Matches The Search Term
@@ -70,7 +93,9 @@ function App() {
 
   return (
     <div className="App">
-      <h1><FaCocktail /> Cocktail Recipes</h1>
+      <h1>
+        <CocktailIcon /> Cocktail Recipes
+      </h1>
 
       <h5>Version: Beta</h5>
 
