@@ -1,154 +1,93 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import './App.css';
-import { FaCocktail } from 'react-icons/fa';
-
-interface Ingredient {
-  ingredient: string;
-  amount: string;
-}
-
-interface Cocktail {
-  name: string;
-  description: string;
-  category: string;
-  base_spirit: string;
-  history: string;
-  recommendations: string;
-  instructions: string;
-  ingredients: Ingredient[];
-}
-
-// Explicitly cast FaCocktail to a valid React component type
-const CocktailIcon = FaCocktail as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
+import { Box, Toolbar, Container } from '@mui/material';
+import TopBar from './components/TopBar';
+import SideBar from './components/SideBar';
+import CategoryBar from './components/CategoryBar';
+import CocktailGrid from './components/CocktailGrid';
+import { Cocktail } from './types';
 
 function App() {
-  // Set Constant Or Default Values
   const [cocktails, setCocktails] = useState<Cocktail[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedCocktail, setSelectedCocktail] = useState<Cocktail | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedTopCategory, setSelectedTopCategory] = useState<string>('All');
 
   const API_BASE = process.env.REACT_APP_API_URL;
 
-  // Fetch Cocktails From The Backend
   useEffect(() => {
     if (!API_BASE) {
       console.error('API_BASE is not defined');
       return;
     }
-    fetch(`${API_BASE}/api/cocktails`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-        console.log(response);
-        return response; // Make sure to return the response here
-      })
-      .then(response => response.json())
+    fetch(`${API_BASE}/api/cocktails`)
+      .then((res) => res.json())
       .then((data: Cocktail[]) => setCocktails(data))
-      .catch(error => console.error('Error fetching data:', error));
+      .catch((err) => console.error('Error:', err));
   }, [API_BASE]);
 
-  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  // Normalize And Remove Diacritics From A String
-  function normalize(str: string): string {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  }
+  const handleSideCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
 
-  // Create A Constant To Hold The Sorted Cocktails Array Alphabetically By Name --- Have it ignore "The " and "A " at the front of a name
-  // const sortedCocktails = [...cocktails].sort((a, b) => a.name.localeCompare(b.name));
+  const handleTopCategorySelect = (category: string) => {
+    setSelectedTopCategory(category);
+  };
 
-  // Filter Cocktails By Name Or Ingredients ----- Add an X option to remove/clear the search term
-  const filteredCocktails = cocktails.filter(cocktail => {
-    // const filteredCocktails = sortedCocktails.filter(cocktail => {
-    // Normalize The Search Term
-    const normalizedSearchTerm = normalize(searchTerm);
-    // Check If Any Cocktail Matches The Search Term
-    const nameMatch = normalize(cocktail.name).includes(normalizedSearchTerm);
-    // Check If Any Ingredient Matches The Search Term
-    const ingredientMatch = cocktail.ingredients.some(ingredient =>
-      normalize(ingredient.ingredient).includes(normalizedSearchTerm)
-    );
-    // Check If Any Base Spirit Matches The Search Term
-    const base_spiritMatch = normalize(cocktail.base_spirit).includes(normalizedSearchTerm);
-    // Check If Any Category Matches The Search Term
-    const categoryMatch = normalize(cocktail.category).includes(normalizedSearchTerm);
-    // Return True If Any Of The Above Matches The Search Term
-    return nameMatch || ingredientMatch || base_spiritMatch || categoryMatch;
-  });
-
-  // Sort functions
-  // const sortByName = () => {
-  //   const sorted = [...cocktails].sort((a, b) => a.name.localeCompare(b.name));
-  //   setCocktails(sorted);
-  // };
-
-  // const sortByBaseSpirit = () => {
-  //   const sorted = [...cocktails].sort((a, b) => a.base_spirit.localeCompare(b.base_spirit));
-  //   setCocktails(sorted);
-  // };
+  const filteredCocktails = cocktails.filter((cocktail) => {
+    // Filter by left sidebar category (e.g., "Classic", "Sour", etc.)
+    if (selectedCategory !== 'All') {
+      if (cocktail.category.toLowerCase() !== selectedCategory.toLowerCase()) {
+        return false;
+      }
+    }
+    
+    // Filter by top category (e.g., "Vodka", "Tequila", etc.)
+    if (selectedTopCategory !== 'All') {
+      if (cocktail.base_spirit.toLowerCase() !== selectedTopCategory.toLowerCase()) {
+        return false;
+      }
+    }
+    
+    // Filter by search term
+    if (searchTerm.trim() !== '') {
+      return cocktail.name.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    
+    return true;
+  });  
 
   return (
-    <div className="App">
-      <h1>
-        <CocktailIcon /> Cocktail Recipes
-      </h1>
-
-      <h5>Version: Beta</h5>
-
-      <input
-        type="text"
-        placeholder="Search For Cocktails Or Ingredients..."
-        value={searchTerm}
-        onChange={handleSearch}
-        className="search-bar"
+    <Box sx={{ display: 'flex' }}>
+      <TopBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+      <SideBar
+        selectedCategory={selectedCategory}
+        onCategorySelect={handleSideCategorySelect}
       />
 
-      {/* Sorting Buttons
-      <div className="sort-buttons">
-        <button onClick={sortByName} className="sort-button">Sort by Name</button>
-        <button onClick={sortByBaseSpirit} className="sort-button">Sort by Base Spirit</button>
-      </div> */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          mt: 6,
+          p: 3,
+        }}
+      >
+        <CategoryBar
+          selectedCategory={selectedTopCategory}
+          onCategorySelect={handleTopCategorySelect}
+        />
 
-      <div className="cocktail-list">
-        {filteredCocktails.map((cocktail, index) => (
-          <div
-            key={index}
-            className="cocktail-card"
-            onClick={() => setSelectedCocktail(cocktail)}
-          >
-            <h2 className="cocktail-name">{cocktail.name}</h2>
-            <p className="cocktail-description">{cocktail.description}</p>
-            <p className="category">Category: {cocktail.category}</p>
-            <p className="base-spirit">Base Spirit: {cocktail.base_spirit}</p>
-          </div>
-        ))}
-      </div>
+        <Toolbar variant="dense" />
 
-      {selectedCocktail && (
-        <div className="modal-overlay" onClick={() => setSelectedCocktail(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{selectedCocktail.name}</h2>
-            <p>{selectedCocktail.description}</p>
-            <p><strong>History:</strong> {selectedCocktail.history}</p>
-            <p><strong>Reco-my-dations:</strong> {selectedCocktail.recommendations}</p>
-            <p><strong>Instructions:</strong> {selectedCocktail.instructions}</p>
-            <h3>Ingredients:</h3>
-            <ul className="ingredients-list">
-              {selectedCocktail.ingredients.map((ingredient, i) => (
-                <li key={i} className="ingredient-item">
-                  {ingredient.amount} of {ingredient.ingredient}
-                </li>
-              ))}
-            </ul>
-            <button onClick={() => setSelectedCocktail(null)} className="close-button">Close</button>
-          </div>
-        </div>
-      )}
-    </div>
+        <Container>
+          <CocktailGrid cocktails={filteredCocktails} />
+        </Container>
+      </Box>
+    </Box>
   );
 }
 

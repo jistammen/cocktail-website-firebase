@@ -1,8 +1,7 @@
 import json
 import requests
 import csv
-
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -51,7 +50,8 @@ def fetch_cocktails():
                 "instructions": fix_encoding(row[5]),
                 "recommendations": fix_encoding(row[6]),
                 "history": fix_encoding(row[7]),
-                "ingredients": []
+                "ingredients": [],
+                "image": fix_encoding(row[8]),
             }
 
         # Add ingredients
@@ -63,12 +63,20 @@ def fetch_cocktails():
                     "amount": fix_encoding(row[2])
                 })
 
+        # Check for a query parameter "name"
+        query_name = request.args.get('name')
+        if query_name:
+            query_name = query_name.lower().strip()
+            for cocktail in cocktails.values():
+                if cocktail["name"].lower() == query_name:
+                    return json.dumps(cocktail, ensure_ascii=False, indent=4)
+            return json.dumps({"error": "Cocktail not found"}), 404
+
+        # If no name query provided, return full list
         return json.dumps(list(cocktails.values()), ensure_ascii=False, indent=4)
 
     except Exception as e:
         return json.dumps({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # response = fetch_cocktails()
-    # print(response)
     app.run(debug=True)
