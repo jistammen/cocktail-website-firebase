@@ -197,3 +197,6 @@ The API will be live at: https://cocktail-website-a4f5d.web.app/api/cocktails
   git push origin feature/new-feature
   ```
 5. Open a pull request.
+  ```bash
+  git pull origin main
+  ```

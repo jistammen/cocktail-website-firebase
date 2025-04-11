@@ -1,7 +1,7 @@
 import json
 import requests
 import csv
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_cors import CORS
 
 app = Flask(__name__)
