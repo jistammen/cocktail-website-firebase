@@ -19,7 +19,7 @@ function App() {
       console.error('API_BASE is not defined');
       return;
     }
-    fetch(`https://us-central1-cocktail-website-a4f5d.cloudfunctions.net/cocktailapi/api/cocktails`)
+    fetch(`${API_BASE}/api/cocktails`)
       .then((res) => res.json())
       .then((data: Cocktail[]) => setCocktails(data))
       .catch((err) => console.error('Error:', err));
