@@ -1,7 +1,8 @@
 import json
 import requests
 import csv
-from flask import Flask, request
+import os
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -11,34 +12,28 @@ COCKTAILS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj
 INGREDIENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj24vDcMr96JYTqKeaVyYmvAvEwKF_SgSEXM12rKl_TIufI_oDKaSIKmLMfZU1srdDB1oS/pub?gid=1237016155&single=true&output=csv"
 
 def fix_encoding(text):
-    """Fix misinterpreted characters from encoding issues."""
     if text is None:
-        return ""  # Return an empty string if None
-    return text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")  # Ensures valid UTF-8
+        return ""
+    return text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
 
 @app.route('/api/cocktails', methods=['GET'])
 def fetch_cocktails():
     try:
-        # Fetch CSV data from URLs
         cocktails_response = requests.get(COCKTAILS_CSV_URL)
         ingredients_response = requests.get(INGREDIENTS_CSV_URL)
 
         if cocktails_response.status_code != 200 or ingredients_response.status_code != 200:
-            return json.dumps({"error": "Failed to fetch data"}), 500
+            return jsonify({"error": "Failed to fetch data"}), 500
 
-        # Decode with UTF-8-SIG to remove potential BOM (Byte Order Mark)
         cocktails_text = cocktails_response.content.decode("utf-8-sig", errors="ignore")
         ingredients_text = ingredients_response.content.decode("utf-8-sig", errors="ignore")
 
-        # Parse CSV content
         cocktails_csv = csv.reader(cocktails_text.splitlines(), delimiter=',')
         ingredients_csv = csv.reader(ingredients_text.splitlines(), delimiter=',')
 
-        # Skip headers
         cocktails_list = list(cocktails_csv)[2:]
         ingredients_list = list(ingredients_csv)[1:]
 
-        # Build cocktails dictionary
         cocktails = {}
         for row in cocktails_list:
             cocktails[row[0]] = {
@@ -54,7 +49,6 @@ def fetch_cocktails():
                 "image": fix_encoding(row[8]),
             }
 
-        # Add ingredients
         for row in ingredients_list:
             cocktail_id = row[0]
             if cocktail_id in cocktails:
@@ -63,20 +57,23 @@ def fetch_cocktails():
                     "amount": fix_encoding(row[2])
                 })
 
-        # Check for a query parameter "name"
         query_name = request.args.get('name')
         if query_name:
             query_name = query_name.lower().strip()
             for cocktail in cocktails.values():
                 if cocktail["name"].lower() == query_name:
-                    return json.dumps(cocktail, ensure_ascii=False, indent=4)
-            return json.dumps({"error": "Cocktail not found"}), 404
+                    return jsonify(cocktail)
+            return jsonify({"error": "Cocktail not found"}), 404
 
-        # If no name query provided, return full list
-        return json.dumps(list(cocktails.values()), ensure_ascii=False, indent=4)
+        return jsonify(list(cocktails.values()))
 
     except Exception as e:
-        return json.dumps({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
+def app_entry(request):
+    """Dispatches HTTP request into Flask app."""
+    return app(request.environ, start_response=lambda *args, **kwargs: None)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=False)

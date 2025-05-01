@@ -1,20 +1,16 @@
 {
   "hosting": {
     "public": "frontend/build",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "/api/**",
-        "function": "pythonApi"
+        "function": "cocktailapi"
       },
       {
         "source": "**",
         "destination": "/index.html"
       }
     ]
-  },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs18",
-    "memory": "512MB"
   }
 }

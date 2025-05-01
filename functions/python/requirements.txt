@@ -1,5 +1,4 @@
 gunicorn
+requests
 flask
 flask-cors
-#flask_cors
-requests
