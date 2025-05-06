@@ -1,12 +1,12 @@
+import os
 import json
 import requests
 import csv
-import os
 from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # This enables CORS for all routes
+CORS(app)
 
 COCKTAILS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj24vDcMr96JYTqKeaVyYmvAvEwKF_SgSEXM12rKl_TIufI_oDKaSIKmLMfZU1srdDB1oS/pub?gid=0&single=true&output=csv"
 INGREDIENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxZnG0uDkj24vDcMr96JYTqKeaVyYmvAvEwKF_SgSEXM12rKl_TIufI_oDKaSIKmLMfZU1srdDB1oS/pub?gid=1237016155&single=true&output=csv"
@@ -16,8 +16,7 @@ def fix_encoding(text):
         return ""
     return text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
 
-@app.route('/api/cocktails', methods=['GET'])
-def fetch_cocktails():
+def build_response(req):
     try:
         cocktails_response = requests.get(COCKTAILS_CSV_URL)
         ingredients_response = requests.get(INGREDIENTS_CSV_URL)
@@ -57,12 +56,13 @@ def fetch_cocktails():
                     "amount": fix_encoding(row[2])
                 })
 
-        query_name = request.args.get('name')
+        query_name = req.args.get('name')
         if query_name:
             query_name = query_name.lower().strip()
             for cocktail in cocktails.values():
                 if cocktail["name"].lower() == query_name:
                     return jsonify(cocktail)
+
             return jsonify({"error": "Cocktail not found"}), 404
 
         return Response(
@@ -73,9 +73,14 @@ def fetch_cocktails():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Used by Firebase Functions
 def app_entry(request):
-    """Dispatches HTTP request into Flask app."""
-    return app(request.environ, start_response=lambda *args, **kwargs: None)
+    return build_response(request)
+
+# Used when running locally via `python main.py`
+@app.route("/api/cocktails", methods=["GET"])
+def fetch_cocktails():
+    return build_response(request)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
