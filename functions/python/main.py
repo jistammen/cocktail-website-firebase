@@ -2,7 +2,7 @@ import json
 import requests
 import csv
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -65,7 +65,10 @@ def fetch_cocktails():
                     return jsonify(cocktail)
             return jsonify({"error": "Cocktail not found"}), 404
 
-        return jsonify(list(cocktails.values()))
+        return Response(
+            json.dumps(list(cocktails.values()), ensure_ascii=False, indent=2),
+            content_type="application/json"
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

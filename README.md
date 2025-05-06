@@ -27,21 +27,37 @@ A full-stack cocktail application with a Python-based API and a React-based fron
 
 ```bash
 project-root/
-├── frontend/                     # React frontend
-│   ├── public/                   # Contains static files that are served directly by the web server
-│   ├── src/                      # Contains the source code of your React application
-│   ├── build/                    # Production-ready React build
-│   └── package.json              # Frontend dependencies and scripts
+├── frontend/
+│   ├── public/
+│   │   ├── index.html              # General HTML properties (title, images, etc.)
+│   │   ├── manifest.json           # Image properties (src, type, size, etc.)
+│   │   └── images.svg/png/ico      # Directory where all website images are stored
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── CategoryBar.tsx     # Where the type of spirits are set
+│   │   │   ├── CocktailCard.tsx    # How the cocktail cards are organized
+│   │   │   ├── CocktailGrid.tsx    # The cocktail grid spacing component 
+│   │   │   ├── SideBar.tsx         # Where the types of style of cocktails are set
+│   │   │   └── TopBar.tsx          # The header component of the website
+│   │   ├── pages/
+│   │   │   └── cocktailDetails.tsx # Sets cocktail page information
+│   │   ├── App.tsx                 # Application functional logic
+│   │   ├── index.css               # Index CSS settings
+│   │   ├── index.tsx               # Index functional logic
+│   │   ├── RootApp.tsx             # Sets application routing
+│   │   └── types.ts                # Sets Cocktail and Ingredient data types (str)
+│   ├── build/
+│   └── package.json                # Frontend dependencies and scripts
 ├── functions/
 │   ├── python/
-│   │   ├── main.py               # Flask app and API logic
-│   │   └── requirements.txt      # Python dependencies
-│   ├── index.js                  # Node.js wrapper for Firebase Functions
-│   └── package.json              # Backend dependencies
-├── firebase.json                 # Firebase configuration
-├── .firebaserc                   # Firebase project mapping
-├── .gitignore                    # Ignore sensitive files (e.g., credentials)
-└── README.md                     # Project documentation
+│   │   ├── start.sh                # Shell script to run startup command (python main.py)
+│   │   ├── main.py                 # Flask app and API logic
+│   │   └── requirements.txt        # Python dependencies
+│   └── package.json                # Backend dependencies
+├── firebase.json                   # Firebase configuration
+├── .firebaserc                     # Firebase project mapping
+├── .gitignore                      # Ignore sensitive files (e.g., credentials)
+└── README.md                       # Project documentation
 ```
 
 ---
@@ -52,11 +68,23 @@ The React frontend provides an interactive UI for viewing cocktail recipes.
 
 ### Prerequisites
 
-- **Node.js** (version 14 or later)
-- **npm** (comes with Node.js)
+- **Homebrew**
+  ```bash
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
+- **npm**
+  ```bash
+  brew install node
+  ```
 - **Firebase CLI** installed globally:
   ```bash
   npm install -g firebase-tools
+  ```
+- **GCloud CLI** installed globally:
+  ```bash
+  brew install --cask google-cloud-sdk
+
+  gcloud init
   ```
 
 ---
@@ -98,7 +126,11 @@ To build the React app for deployment on Firebase Hosting:
 
 ## How to Deploy to Firebase
 
-### Frontend Deployment
+### Frontend Deployment (Preferred)
+
+1. Commit it to Github, it will be auto committed to Firebase.
+
+### Frontend Deployment (Alternative)
 
 1. Ensure the frontend is built:
   ```bash
@@ -130,20 +162,31 @@ To build the React app for deployment on Firebase Hosting:
   python main.py
   ```
 
-The API will be available at: http://127.0.0.1:5000/api/cocktails
+The API will be available at either: http://127.0.0.1:8080/api/cocktails OR http://127.0.0.1:5000/api/cocktails
 
 ---
 
-## How to Deploy the Backend (Firebase Functions)
+## How to Deploy the Backend (GCloud Functions)
 
-1. Ensure Firebase is initialized (if not already done):
+1. Ensure GCloud is initialized (if not already done):
   ```bash
-  firebase init
+  gcloud init
   ```
-2. Deploy the Firebase Functions:
+2. Navigate to the backend folder:
   ```bash
-  firebase deploy --only functions
+  cd functions/python
   ```
+3. Deploy the GCloud Functions:
+  ```bash
+  gcloud functions deploy cocktailapi \
+  --runtime python310 \
+  --entry-point app_entry \
+  --trigger-http \
+  --allow-unauthenticated \
+  --region us-central1
+  ```
+4. Ensure that the API is live at: https://us-central1-cocktail-website-a4f5d.cloudfunctions.net/cocktailapi/api/cocktails
+5. Commit it to Github, it will be auto committed to Firebase.
 
 The API will be live at: https://cocktail-website-a4f5d.web.app/api/cocktails
 
@@ -190,11 +233,11 @@ The API will be live at: https://cocktail-website-a4f5d.web.app/api/cocktails
   ```
 3. Commit your changes:
   ```bash
-  git commit -m "Add new feature"
+  git commit -m "Description Of Change"
   ```
 4. Push to the branch:
   ```bash
-  git push origin feature/new-feature
+  git push -f origin main
   ```
 5. Open a pull request.
   ```bash

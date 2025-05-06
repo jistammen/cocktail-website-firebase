@@ -37,32 +37,51 @@ function App() {
     setSelectedTopCategory(category);
   };
 
+  // Normalize special characters like é to e
+  const normalizeString = (str: string): string => {
+    return str
+      .normalize('NFD')                // Decompose characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .toLowerCase();                  // Case-insensitive comparison
+  };
+
   const filteredCocktails = cocktails.filter((cocktail) => {
     // Filter by left sidebar category (e.g., "Classic", "Sour", etc.)
-    if (selectedCategory !== 'All') {
-      if (cocktail.category.toLowerCase() !== selectedCategory.toLowerCase()) {
-        return false;
-      }
+    if (selectedCategory !== 'All' && normalizeString(cocktail.category) !== normalizeString(selectedCategory)) {
+      return false;
     }
-    
+
     // Filter by top category (e.g., "Vodka", "Tequila", etc.)
-    if (selectedTopCategory !== 'All') {
-      if (cocktail.base_spirit.toLowerCase() !== selectedTopCategory.toLowerCase()) {
-        return false;
-      }
+    if (selectedTopCategory !== 'All' && normalizeString(cocktail.base_spirit) !== normalizeString(selectedTopCategory)) {
+      return false;
     }
-    
+
     // Filter by search term
-    if (searchTerm.trim() !== '') {
-      return cocktail.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const normalizedSearch = normalizeString(searchTerm.trim());
+    if (normalizedSearch !== '') {
+      const nameMatch = normalizeString(cocktail.name).includes(normalizedSearch);
+      const ingredientMatch = cocktail.ingredients.some((ingredient) =>
+        normalizeString(ingredient.ingredient).includes(normalizedSearch)
+      );
+      return nameMatch || ingredientMatch;
     }
-    
+
     return true;
-  });  
+  });
+
+  const handleResetSearch = () => {
+    setSearchTerm('');
+    setSelectedCategory('All');
+    setSelectedTopCategory('All');
+  };  
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <TopBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+      <TopBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onResetSearch={handleResetSearch}
+      />
       <SideBar
         selectedCategory={selectedCategory}
         onCategorySelect={handleSideCategorySelect}

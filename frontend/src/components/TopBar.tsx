@@ -1,36 +1,45 @@
 import React, { ChangeEvent } from 'react';
 import { AppBar, Toolbar, IconButton, Typography, TextField, Button } from '@mui/material';
-import { FaCocktail } from 'react-icons/fa';
 
 interface TopBarProps {
   searchTerm: string;
   onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onResetSearch: () => void;
 }
 
-const CocktailIcon = FaCocktail as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-
-function TopBar({ searchTerm, onSearchChange }: TopBarProps) {
+function TopBar({ searchTerm, onSearchChange, onResetSearch }: TopBarProps) {
   return (
     <AppBar
       position="fixed"
       sx={{
         backgroundColor: 'white',
         color: 'black',
-        zIndex: (theme) => theme.zIndex.drawer + 1, // Ensure above drawer
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
       <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="logo" sx={{ mr: 1 }}>
-          <CocktailIcon />
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label="reset search"
+          onClick={onResetSearch}
+          sx={{ mr: 1 }}
+        >
+          <img
+            src="/cascade_cocktails_icon.svg"
+            alt="Cascade Cocktails"
+            style={{ width: '28px', height: '28px' }}
+          />
         </IconButton>
+
         <Typography variant="h6" sx={{ fontWeight: 'bold', mr: 2 }}>
-          Cocktail Recipes
+          Cascade Cocktails
         </Typography>
 
         <TextField
           variant="outlined"
           size="small"
-          placeholder="Search Cocktails..."
+          placeholder="Search For Cocktails Or Liquor..."
           value={searchTerm}
           onChange={onSearchChange}
           sx={{
