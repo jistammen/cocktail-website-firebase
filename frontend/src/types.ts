@@ -4,6 +4,7 @@ export interface Ingredient {
   }
   
   export interface Cocktail {
+    id: string;
     name: string;
     description: string;
     category: string;

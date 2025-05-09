@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Typography, Box, CircularProgress } from '@mui/material';
 import { Cocktail } from '../types';
 
@@ -8,6 +8,7 @@ function CocktailDetails() {
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const API_BASE = process.env.REACT_APP_API_URL;
 
@@ -39,7 +40,7 @@ function CocktailDetails() {
 
   const renderBackButton = () => (
     <button
-      onClick={() => navigate('/')}
+      onClick={() => navigate(`/${location.search}`)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -47,7 +48,7 @@ function CocktailDetails() {
         gap: '0.5rem',
         padding: '0.5rem 1rem',
         borderRadius: '4px',
-        background: '#e65c3d', // toned-down orange
+        background: '#e65c3d',
         color: 'white',
         border: 'none',
         cursor: 'pointer',
@@ -129,7 +130,6 @@ function CocktailDetails() {
         History:
       </Typography>
       <Typography>{cocktail.history}</Typography>
-
     </Container>
   );
 }

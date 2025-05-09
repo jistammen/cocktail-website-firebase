@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { Box, Toolbar, Container } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import SideBar from './components/SideBar';
 import CategoryBar from './components/CategoryBar';
@@ -13,6 +14,26 @@ function App() {
   const [selectedTopCategory, setSelectedTopCategory] = useState<string>('All');
 
   const API_BASE = process.env.REACT_APP_API_URL;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const search = params.get('search') || '';
+    const leftCategory = params.get('category') || 'All';
+    const topCategory = params.get('base') || 'All';
+    setSearchTerm(search);
+    setSelectedCategory(leftCategory);
+    setSelectedTopCategory(topCategory);
+  }, [location.search]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (selectedCategory !== 'All') params.set('category', selectedCategory);
+    if (selectedTopCategory !== 'All') params.set('base', selectedTopCategory);
+    navigate({ search: params.toString() }, { replace: true });
+  }, [searchTerm, selectedCategory, selectedTopCategory, navigate]);
 
   useEffect(() => {
     if (!API_BASE) {
@@ -37,35 +58,29 @@ function App() {
     setSelectedTopCategory(category);
   };
 
-  // Normalize special characters like é to e
   const normalizeString = (str: string): string => {
     return str
-      .normalize('NFD')                // Decompose characters
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .toLowerCase();                  // Case-insensitive comparison
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase();
   };
 
   const filteredCocktails = cocktails.filter((cocktail) => {
-    // Filter by left sidebar category (e.g., "Classic", "Sour", etc.)
     if (selectedCategory !== 'All' && normalizeString(cocktail.category) !== normalizeString(selectedCategory)) {
       return false;
     }
-
-    // Filter by top category (e.g., "Vodka", "Tequila", etc.)
     if (selectedTopCategory !== 'All' && normalizeString(cocktail.base_spirit) !== normalizeString(selectedTopCategory)) {
       return false;
     }
-
-    // Filter by search term
     const normalizedSearch = normalizeString(searchTerm.trim());
     if (normalizedSearch !== '') {
       const nameMatch = normalizeString(cocktail.name).includes(normalizedSearch);
+      const spiritMatch = normalizeString(cocktail.base_spirit).includes(normalizedSearch);
       const ingredientMatch = cocktail.ingredients.some((ingredient) =>
         normalizeString(ingredient.ingredient).includes(normalizedSearch)
       );
-      return nameMatch || ingredientMatch;
+      return nameMatch || spiritMatch || ingredientMatch;
     }
-
     return true;
   });
 
@@ -73,7 +88,7 @@ function App() {
     setSearchTerm('');
     setSelectedCategory('All');
     setSelectedTopCategory('All');
-  };  
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
