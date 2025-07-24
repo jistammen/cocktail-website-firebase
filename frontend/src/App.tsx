@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Box, Toolbar, Container } from '@mui/material';
+import { Box, Toolbar, Container, useMediaQuery, useTheme, Drawer } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import SideBar from './components/SideBar';
@@ -12,10 +12,13 @@ function App() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedTopCategory, setSelectedTopCategory] = useState<string>('All');
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const API_BASE = process.env.REACT_APP_API_URL;
   const location = useLocation();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -52,6 +55,7 @@ function App() {
 
   const handleSideCategorySelect = (category: string) => {
     setSelectedCategory(category);
+    if (isMobile) setDrawerOpen(false);
   };
 
   const handleTopCategorySelect = (category: string) => {
@@ -59,10 +63,7 @@ function App() {
   };
 
   const normalizeString = (str: string): string => {
-    return str
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toLowerCase();
+    return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   };
 
   const filteredCocktails = cocktails.filter((cocktail) => {
@@ -96,27 +97,31 @@ function App() {
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         onResetSearch={handleResetSearch}
-      />
-      <SideBar
-        selectedCategory={selectedCategory}
-        onCategorySelect={handleSideCategorySelect}
+        onMenuClick={() => setDrawerOpen(true)}
       />
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          mt: 6,
-          p: 3,
-        }}
-      >
+      {isMobile ? (
+        <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+          <Box sx={{ width: 250 }}>
+            <SideBar
+              selectedCategory={selectedCategory}
+              onCategorySelect={handleSideCategorySelect}
+            />
+          </Box>
+        </Drawer>
+      ) : (
+        <SideBar
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleSideCategorySelect}
+        />
+      )}
+
+      <Box component="main" sx={{ flexGrow: 1, mt: 6, p: 3 }}>
         <CategoryBar
           selectedCategory={selectedTopCategory}
           onCategorySelect={handleTopCategorySelect}
         />
-
         <Toolbar variant="dense" />
-
         <Container>
           <CocktailGrid cocktails={filteredCocktails} />
         </Container>

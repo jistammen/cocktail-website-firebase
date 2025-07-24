@@ -1,9 +1,11 @@
 import React from 'react';
 import { AppBar, Toolbar, Box, Typography, Stack } from '@mui/material';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
+import AllInboxIcon from '@mui/icons-material/AllInbox';
 import LiquorIcon from '@mui/icons-material/Liquor';
-import SportsBarIcon from '@mui/icons-material/SportsBar';
-import WineBarIcon from '@mui/icons-material/WineBar';
+import ParkIcon from '@mui/icons-material/Park';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import SailingIcon from '@mui/icons-material/Sailing';
+import SpaIcon from '@mui/icons-material/Spa';
 
 interface Category {
   name: string;
@@ -11,12 +13,12 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { name: 'All', icon: <LocalBarIcon /> },
+  { name: 'All', icon: <AllInboxIcon /> },
+  { name: 'Whiskey', icon: <ParkIcon /> },
   { name: 'Vodka', icon: <LiquorIcon /> },
-  { name: 'Tequila', icon: <SportsBarIcon /> },
-  { name: 'Rum', icon: <LocalBarIcon /> },
-  { name: 'Gin', icon: <WineBarIcon /> },
-  { name: 'Whiskey', icon: <LiquorIcon /> },
+  { name: 'Tequila', icon: <WbSunnyIcon /> },
+  { name: 'Rum', icon: <SailingIcon /> },
+  { name: 'Gin', icon: <SpaIcon /> },
 ];
 
 interface CategoryBarProps {

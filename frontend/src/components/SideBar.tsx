@@ -9,17 +9,27 @@ import {
   Toolbar,
 } from '@mui/material';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
-import LiquorIcon from '@mui/icons-material/Liquor';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import LocalDrinkIcon from '@mui/icons-material/LocalDrink'
+import IcecreamIcon from '@mui/icons-material/Icecream'
+import NoDrinkIcon from '@mui/icons-material/NoDrinks';
 import OpacityIcon from '@mui/icons-material/Opacity';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 
 const categories = [
   { name: 'All', icon: <AllInboxIcon /> },
-  { name: 'Classic', icon: <LiquorIcon /> },
+  { name: 'Classic', icon: <AutoAwesomeIcon /> },
   { name: 'Sour', icon: <LocalBarIcon /> },
   { name: 'Fizz', icon: <BubbleChartIcon /> },
+  { name: 'Tiki', icon: <BeachAccessIcon />},
+  { name: 'Highball', icon: <LocalDrinkIcon />},
+  { name: 'Dessert', icon: <IcecreamIcon />},
+  { name: 'Mocktail', icon: <NoDrinkIcon />},
   { name: 'Syrup', icon: <OpacityIcon /> },
+  { name: 'Information', icon: <AutoStoriesIcon />},
 ];
 
 interface SideBarProps {

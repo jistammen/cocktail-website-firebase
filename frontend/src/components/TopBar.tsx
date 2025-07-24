@@ -1,13 +1,26 @@
 import React, { ChangeEvent } from 'react';
-import { AppBar, Toolbar, IconButton, Typography, TextField, Button } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  TextField,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface TopBarProps {
   searchTerm: string;
   onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onResetSearch: () => void;
+  onMenuClick?: () => void;
 }
 
-function TopBar({ searchTerm, onSearchChange, onResetSearch }: TopBarProps) {
+function TopBar({ searchTerm, onSearchChange, onResetSearch, onMenuClick }: TopBarProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <AppBar
       position="fixed"
@@ -18,6 +31,20 @@ function TopBar({ searchTerm, onSearchChange, onResetSearch }: TopBarProps) {
       }}
     >
       <Toolbar>
+        {/* Mobile Menu Icon */}
+        {isMobile && onMenuClick && (
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={onMenuClick}
+            sx={{ mr: 1 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Logo Button */}
         <IconButton
           edge="start"
           color="inherit"
@@ -49,13 +76,6 @@ function TopBar({ searchTerm, onSearchChange, onResetSearch }: TopBarProps) {
             mr: 2,
           }}
         />
-
-        <Button color="inherit" sx={{ mr: 2 }}>
-          LOGIN
-        </Button>
-        <Button variant="contained" color="primary">
-          SIGN UP
-        </Button>
       </Toolbar>
     </AppBar>
   );
