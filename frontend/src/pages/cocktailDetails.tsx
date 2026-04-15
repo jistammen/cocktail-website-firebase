@@ -108,6 +108,11 @@ function CocktailDetails() {
       </Typography>
 
       <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 2 }}>
+        Description:
+      </Typography>
+      <Typography>{cocktail.description}</Typography>
+
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 2 }}>
         Ingredients:
       </Typography>
       {cocktail.ingredients.map((ing, i) => (
